@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "task_tracker": "./index.js"
+    "task-cli": "./index.js"
   },
   "type":"module",
   "scripts": {

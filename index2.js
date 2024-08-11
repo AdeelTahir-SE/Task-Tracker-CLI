@@ -1,4 +1,3 @@
-import fs from "fs/promises";
 import fse from "fs-extra";
 
 export async function getDB() {
@@ -8,9 +7,17 @@ export async function getDB() {
 
 export async function addTask(descreption) {
   let datatopush = await getDB();
-  datatopush.push({ id: datatopush.length, descreption ,todo:true,inprogess:false,isdone:false,createdAt:new Date(),updatedAt:"null"});
-  console.log(datatopush);
+  datatopush.push({
+    id: datatopush.length,
+    descreption,
+    todo: true,
+    inprogress: false,
+    isdone: false,
+    createdAt: new Date(),
+    updatedAt: "null",
+  });
   await fse.writeJSON("./index.json", { task_cli: datatopush }, { spaces: 2 });
+  console.log(`task added successfully! ID: ${datatopush.length - 1}`);
 }
 
 export async function removeTask(Id) {
@@ -18,22 +25,31 @@ export async function removeTask(Id) {
   const arr = datatopush.filter((v, i, arr) => {
     return v.id !== Id;
   });
+  if (datatopush == arr) {
+    console.log("task of that ID not found");
+  } else {
+    console.log("task removed successfully");
+  }
   await fse.writeJSON("./index.json", { task_cli: arr }, { spaces: 2 });
 }
 
 export async function deleteAllTasks() {
   await fse.writeJSON("./index.json", { task_cli: [] }, { spaces: 2 });
+  console.log("all tasks removed successfully!");
 }
 
 export async function deletetask(Id) {
-const data =await getDB()
-
-
-
-
-
-    await fse.writeJSON("./index.json", { task_cli: [] }, { spaces: 2 });
+  const data = await getDB();
+  const arr = data.filter((v, i, arr) => {
+    return v.id !== Id;
+  });
+  if (data == arr) {
+    console.log("task of that ID not found");
+  } else {
+    console.log("task removed successfully");
   }
+  await fse.writeJSON("./index.json", { task_cli: arr }, { spaces: 2 });
+}
 
 export async function updateTask(id, Data) {
   const data = await getDB();
@@ -41,74 +57,73 @@ export async function updateTask(id, Data) {
     return v.id === id;
   });
   if (index !== -1) {
-    data[index].descreption = Data
+    data[index].descreption = Data;
     data[index].updatedAt = new Date();
+    console.log("task updated successfully");
   } else {
     console.log("task of that id do not exists");
   }
-  await fse.writeJSON("./index.json", { task_cli: data },{spaces:2});
+  await fse.writeJSON("./index.json", { task_cli: data }, { spaces: 2 });
 }
 
+export async function markTaskInProgress(id) {
+  const data = await getDB();
+  const index = data.findIndex((v, i, arr) => {
+    return v.id === id;
+  });
+  if (index >= 0) {
+    data[index].inprogress = true;
+    data[index].isdone = false;
+    data[index].todo = false;
+    console.log("task marked as in progress");
+  } else {
+    console.log("Sorry task of that id do not exists");
+  }
 
-export async function markTaskInProgress(id){
-const data = await getDB();
-const index = data.findIndex((v, i, arr) => {
-return v.id ===id;
-});
-data[index].inprogess=true;
-data[index].isdone=false;
-data[index].todo=false;
-await fse.writeJSON("./index.json",{task_cli:data},{spaces:2})
+  await fse.writeJSON("./index.json", { task_cli: data }, { spaces: 2 });
 }
 
-export async function markTaskisDone(id){
-    const data = await getDB();
-    const index = data.findIndex((v, i, arr) => {
-    return v.id ===id;
-    });
-    data[index].inprogess=false;
-    data[index].isdone=true;
-    data[index].todo=false;
-    await fse.writeJSON("./index.json",{task_cli:data},{spaces:2})
+export async function markTaskisDone(id) {
+  const data = await getDB();
+  const index = data.findIndex((v, i, arr) => {
+    return v.id === id;
+  });
+  if (index >= 0) {
+    console.log("task marked as done");
+    data[index].inprogress = false;
+    data[index].isdone = true;
+    data[index].todo = false;
+  } else {
+    console.log("Sorry task of that id do not exists");
+  }
+
+  await fse.writeJSON("./index.json", { task_cli: data }, { spaces: 2 });
 }
 
-
-
-export async function tasksdone(){
-    const data = await getDB();
-    const arr = data.filter((v, i, arr) => {
+export async function tasksdone() {
+  const data = await getDB();
+  const arr = data.filter((v, i, arr) => {
     return v.isdone === true;
-    })
+  });
 
-    return arr;
+  return arr;
 }
 
+export async function tasksPending() {
+  const data = await getDB();
+  const arr = data.filter((v, i, arr) => {
+    return v.inprogress == true;
+  });
 
-export async function tasksPending(){
-    const data = await getDB();
-    const arr = data.filter((v, i, arr) => {
-    return v.isdone === false;
-    })
-
-    return arr;
+  return arr;
 }
-export async function tasksTodo(){
-    const data = await getDB();
-    const arr = data.filter((v, i, arr) => {
+export async function tasksTodo() {
+  const data = await getDB();
+  const arr = data.filter((v, i, arr) => {
     return v.todo === true;
-    })
+  });
 
-    return arr;
+  return arr;
 }
 
-
-// addTask("hello");
-// removeTask(1);
-// console.log(await getDB());
-// console.log(await tasksPending());
-// console.log(await tasksdone());
-// deleteAllTasks()
-// updateTask(1,"updated task");
-// markTaskisDone(1)
-// markTaskInProgress(1);
 
